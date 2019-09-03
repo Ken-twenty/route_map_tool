@@ -2,11 +2,12 @@ __author__ = "Ken"
 __version__ = "1.0"
 
 import sys
-from PyQt5.QtWidgets import QApplication, QDesktopWidget, QMainWindow, QAction, QWidget, QHBoxLayout, QLabel, QMessageBox, QFileDialog
+from PyQt5.QtWidgets import QApplication, QDesktopWidget, QMainWindow, QAction, QGraphicsView, QGraphicsScene, QMessageBox, QFileDialog
 from PyQt5.QtGui import QIcon, QPixmap
 
 APP_WIDTH = 888
 APP_HEIGHT = APP_WIDTH * .618
+DEFAULT_BACKGROUND = "./source/Jordan.jpg"
 
 
 class RMAction(QAction):
@@ -31,6 +32,15 @@ class RMApp(QMainWindow):
 
     def init(self):
 
+        # 是否已插入背景
+        self.inserted = False
+
+        # 几何 scene
+        self.graphicsScene = QGraphicsScene(self)
+
+        # 背景 item（仅初始化操作，还不是真正的 item，item 需要 scene 的装载）
+        self.backgroundItem = QPixmap(DEFAULT_BACKGROUND)
+
         self.setWindowIcon(QIcon("./source/logo.png"))
         self.setWindowTitle("RouteMapTool v%s" % __version__)
 
@@ -40,7 +50,7 @@ class RMApp(QMainWindow):
 
         self.drawMenuBar()
 
-        self.drawLayout()
+        self.drawGraphicsBase()
 
         self.statusBar()
 
@@ -79,18 +89,13 @@ class RMApp(QMainWindow):
         )
         fileMenu.addAction(quitAction)
 
-    def drawLayout(self):
+    def drawGraphicsBase(self):
 
-        self.backgroundLabel = QLabel(self)
+        # 给 RMApp 实例（QMainWindow） 设置 centralWidget 为 QGraphicsView 实例（即视图），并展示一个 QGraphicsScene 实例（即场景）
+        self.setCentralWidget(QGraphicsView(self.graphicsScene, self))
 
-        # 给 MainWindow 设置 centralWidget
-        centralWidget = QWidget(self)
-        self.setCentralWidget(centralWidget)
-
-        # 给 centralWidget 设置 layout
-        layout = QHBoxLayout(centralWidget)
-        layout.addWidget(self.backgroundLabel)
-        centralWidget.setLayout(layout)
+        # 这时的 backgroundItem 指向真正的 graphicsItem 实例
+        self.backgroundItem = self.graphicsScene.addPixmap(self.backgroundItem)
 
     def insert(self):
 
@@ -104,7 +109,31 @@ class RMApp(QMainWindow):
 
         if background[0]:
 
-            self.backgroundLabel.setPixmap(QPixmap(background[0]))
+            # 移除当前背景 item
+            self.graphicsScene.removeItem(self.backgroundItem)
+
+            # 把 backgroundItem 重新指向新的背景 item 并添加到 graphicsScene
+            self.backgroundItem = self.graphicsScene.addPixmap(
+                QPixmap(background[0])
+            )
+
+            self.inserted = True
+
+    def wheelEvent(self, event):
+
+        # 重载鼠标滚轮函数
+
+        if self.inserted:
+
+            scaleDelta = event.angleDelta().y()
+
+            if scaleDelta > 0:
+
+                print("bigger")
+
+            else:
+
+                print("smaller")
 
     def closeEvent(self, event):
 
