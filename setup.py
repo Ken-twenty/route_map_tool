@@ -4,6 +4,7 @@ __version__ = "1.0"
 import sys
 from PyQt5.QtWidgets import QApplication, QDesktopWidget, QMainWindow, QAction, QGraphicsView, QGraphicsScene, QMessageBox, QFileDialog
 from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtCore import Qt
 
 APP_WIDTH = 888
 APP_HEIGHT = APP_WIDTH * .618
@@ -19,8 +20,37 @@ class RMAction(QAction):
             name,
             master
         )
+
         self.setStatusTip(statusTip)
         self.triggered.connect(act)
+
+
+class RMQGraphicsView(QGraphicsView):
+
+    def __init__(self, scene, parent):
+
+        super().__init__(scene, parent)
+
+        SBOff = Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        self.setVerticalScrollBarPolicy(SBOff)
+        self.setHorizontalScrollBarPolicy(SBOff)
+
+        # 取消默认的黑框
+        self.setStyleSheet("border: 0")
+
+    def wheelEvent(self, event):
+
+        # 重载鼠标滚轮函数
+
+        scaleDelta = event.angleDelta().y()
+
+        if scaleDelta > 0:
+
+            self.scale(1.0636, 1.0636)
+
+        else:
+
+            self.scale(0.9364, 0.9364)
 
 
 class RMApp(QMainWindow):
@@ -28,18 +58,19 @@ class RMApp(QMainWindow):
     def __init__(self):
 
         super().__init__()
+
         self.init()
 
     def init(self):
 
-        # 是否已插入背景
-        self.inserted = False
-
         # 几何 scene
         self.graphicsScene = QGraphicsScene(self)
 
-        # 背景 item（仅初始化操作，还不是真正的 item，item 需要 scene 的装载）
-        self.backgroundItem = QPixmap(DEFAULT_BACKGROUND)
+        # 几何 view
+        self.graphicsView = RMQGraphicsView(self.graphicsScene, self)
+
+        # 背景 item
+        self.backgroundItem = None
 
         self.setWindowIcon(QIcon("./source/logo.png"))
         self.setWindowTitle("RouteMapTool v%s" % __version__)
@@ -55,6 +86,8 @@ class RMApp(QMainWindow):
         self.statusBar()
 
         self.show()
+
+    # init start
 
     def center(self):
 
@@ -91,11 +124,14 @@ class RMApp(QMainWindow):
 
     def drawGraphicsBase(self):
 
-        # 给 RMApp 实例（QMainWindow） 设置 centralWidget 为 QGraphicsView 实例（即视图），并展示一个 QGraphicsScene 实例（即场景）
-        self.setCentralWidget(QGraphicsView(self.graphicsScene, self))
+        # 给 RMApp 实例（QMainWindow） 设置 centralWidget 为 QGraphicsView 实例（QWidget）
+        self.setCentralWidget(self.graphicsView)
 
-        # 这时的 backgroundItem 指向真正的 graphicsItem 实例
-        self.backgroundItem = self.graphicsScene.addPixmap(self.backgroundItem)
+        self.backgroundItem = self.graphicsScene.addPixmap(
+            QPixmap(DEFAULT_BACKGROUND)
+        )
+
+    # init end
 
     def insert(self):
 
@@ -116,24 +152,6 @@ class RMApp(QMainWindow):
             self.backgroundItem = self.graphicsScene.addPixmap(
                 QPixmap(background[0])
             )
-
-            self.inserted = True
-
-    def wheelEvent(self, event):
-
-        # 重载鼠标滚轮函数
-
-        if self.inserted:
-
-            scaleDelta = event.angleDelta().y()
-
-            if scaleDelta > 0:
-
-                print("bigger")
-
-            else:
-
-                print("smaller")
 
     def closeEvent(self, event):
 
