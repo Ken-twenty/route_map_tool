@@ -44,6 +44,12 @@ class RMQGraphicsScene(QGraphicsScene):
             QPixmap(newBackground)
         )
 
+        # resize
+        self.setSceneRect(self.backgroundItem.boundingRect())
+
+        # 默认首先展示此 scene 的 view 是主视图
+        self.views()[0].rescaleByBackground(self.backgroundItem)
+
 
 class RMQGraphicsView(QGraphicsView):
 
@@ -57,6 +63,29 @@ class RMQGraphicsView(QGraphicsView):
 
         # 取消默认的黑框
         self.setStyleSheet("border: 0")
+
+    def rescaleByBackground(self, background):
+
+        self.resetTransform()
+
+        # view 可视宽度与 background 的宽度比例
+        scale = self.width() / background.boundingRect().width()
+
+        # background 宽度大于 view 可视宽度
+        if scale < 1:
+
+            # 缩放展示，使 view 的全部可视宽度完整展示 background
+            self.scale(scale, scale)
+
+        # background 尺寸过小
+        else:
+
+            QMessageBox.information(
+                self,
+                "提示",
+                "设计图尺寸过小，请知悉。",
+                QMessageBox.Ok,
+            )
 
     def wheelEvent(self, event):
 
@@ -96,8 +125,8 @@ class RMApp(QMainWindow):
         # 菜单栏
         self.drawMenuBar()
 
-        # 绘图基础
-        self.drawGraphicsBase()
+        # 给 RMApp 实例（QMainWindow） 设置 centralWidget 为 QGraphicsView 实例（QWidget）
+        self.setCentralWidget(self.graphicsView)
 
         # 状态栏
         self.statusBar()
@@ -138,11 +167,6 @@ class RMApp(QMainWindow):
             self
         )
         fileMenu.addAction(quitAction)
-
-    def drawGraphicsBase(self):
-
-        # 给 RMApp 实例（QMainWindow） 设置 centralWidget 为 QGraphicsView 实例（QWidget）
-        self.setCentralWidget(self.graphicsView)
 
     # init end
 
