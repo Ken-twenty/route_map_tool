@@ -13,12 +13,12 @@ DEFAULT_BACKGROUND = "./source/Jordan.jpg"
 
 class RMAction(QAction):
 
-    def __init__(self, name, icon, statusTip, act, master):
+    def __init__(self, name, icon, statusTip, act, parent):
 
         super().__init__(
             QIcon(icon),
             name,
-            master
+            parent
         )
 
         self.setStatusTip(statusTip)
@@ -59,30 +59,30 @@ class RMApp(QMainWindow):
 
         super().__init__()
 
-        self.init()
-
-    def init(self):
-
-        # 几何 scene
+        # 绘图 scene
         self.graphicsScene = QGraphicsScene(self)
 
-        # 几何 view
+        # 绘图 view
         self.graphicsView = RMQGraphicsView(self.graphicsScene, self)
 
         # 背景 item
         self.backgroundItem = None
 
+        # 标题栏
         self.setWindowIcon(QIcon("./source/logo.png"))
         self.setWindowTitle("RouteMapTool v%s" % __version__)
 
+        # 窗体固定尺寸与居中
         self.setFixedSize(APP_WIDTH, APP_HEIGHT)
-
         self.center()
 
+        # 菜单栏
         self.drawMenuBar()
 
+        # 绘图基础
         self.drawGraphicsBase()
 
+        # 状态栏
         self.statusBar()
 
         self.show()
@@ -116,7 +116,7 @@ class RMApp(QMainWindow):
             "退出",
             "./source/quit.png",
             "关闭此应用",
-            # MainWindow 的内置 close 函数，已被重载
+            # MainWindow 的内置 close 事件，事件 slot 已被重载
             self.close,
             self
         )
