@@ -64,6 +64,9 @@ class RMQGraphicsView(QGraphicsView):
         # 取消默认的黑框
         self.setStyleSheet("border: 0")
 
+        # 设置 dragMode 为拖动
+        self.setDragMode(QGraphicsView.ScrollHandDrag)
+
     def rescaleByBackground(self, background):
 
         self.resetTransform()
