@@ -25,6 +25,26 @@ class RMAction(QAction):
         self.triggered.connect(act)
 
 
+class RMQGraphicsScene(QGraphicsScene):
+
+    def __init__(self, parent):
+
+        super().__init__(parent)
+
+        # 设置默认背景并把 backgroundItem 指向它
+        self.backgroundItem = self.addPixmap(QPixmap(DEFAULT_BACKGROUND))
+
+    def changeBackground(self, newBackground):
+
+        # 移除当前背景 item
+        self.removeItem(self.backgroundItem)
+
+        # 设置新的背景并把 backgroundItem 指向它
+        self.backgroundItem = self.addPixmap(
+            QPixmap(newBackground)
+        )
+
+
 class RMQGraphicsView(QGraphicsView):
 
     def __init__(self, scene, parent):
@@ -60,13 +80,10 @@ class RMApp(QMainWindow):
         super().__init__()
 
         # 绘图 scene
-        self.graphicsScene = QGraphicsScene(self)
+        self.graphicsScene = RMQGraphicsScene(self)
 
         # 绘图 view
         self.graphicsView = RMQGraphicsView(self.graphicsScene, self)
-
-        # 背景 item
-        self.backgroundItem = None
 
         # 标题栏
         self.setWindowIcon(QIcon("./source/logo.png"))
@@ -127,15 +144,11 @@ class RMApp(QMainWindow):
         # 给 RMApp 实例（QMainWindow） 设置 centralWidget 为 QGraphicsView 实例（QWidget）
         self.setCentralWidget(self.graphicsView)
 
-        self.backgroundItem = self.graphicsScene.addPixmap(
-            QPixmap(DEFAULT_BACKGROUND)
-        )
-
     # init end
 
     def insert(self):
 
-        background = QFileDialog.getOpenFileName(
+        backgrounds = QFileDialog.getOpenFileName(
             self,
             "选择背景图片",
             "./",
@@ -143,15 +156,9 @@ class RMApp(QMainWindow):
             "Image Files (*.png *.jpg)"
         )
 
-        if background[0]:
+        if backgrounds[0]:
 
-            # 移除当前背景 item
-            self.graphicsScene.removeItem(self.backgroundItem)
-
-            # 把 backgroundItem 重新指向新的背景 item 并添加到 graphicsScene
-            self.backgroundItem = self.graphicsScene.addPixmap(
-                QPixmap(background[0])
-            )
+            self.graphicsScene.changeBackground(backgrounds[0])
 
     def closeEvent(self, event):
 
