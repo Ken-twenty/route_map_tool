@@ -50,12 +50,22 @@ class RMQGraphicsScene(QGraphicsScene):
         # 默认首先展示此 scene 的 view 是主视图
         self.views()[0].rescaleByBackground(self.backgroundItem)
 
+    def mouseReleaseEvent(self, event):
+
+        # 右键
+        if event.button() == 2:
+
+            # TODO
+            print(event.scenePos())
+
 
 class RMQGraphicsView(QGraphicsView):
 
     def __init__(self, scene, parent):
 
         super().__init__(scene, parent)
+
+        self.lastestScale = 1
 
         SBOff = Qt.ScrollBarPolicy.ScrollBarAlwaysOff
         self.setVerticalScrollBarPolicy(SBOff)
@@ -90,19 +100,21 @@ class RMQGraphicsView(QGraphicsView):
                 QMessageBox.Ok,
             )
 
+        self.lastestScale = 1
+
     def wheelEvent(self, event):
 
         # 重载鼠标滚轮函数
 
-        scaleDelta = event.angleDelta().y()
+        if event.angleDelta().y() > 0:
 
-        if scaleDelta > 0:
-
-            self.scale(1.0636, 1.0636)
+            self.lastestScale = (self.lastestScale + .088) / self.lastestScale
 
         else:
 
-            self.scale(0.9364, 0.9364)
+            self.lastestScale = (self.lastestScale - .088) / self.lastestScale
+
+        self.scale(self.lastestScale, self.lastestScale)
 
 
 class RMApp(QMainWindow):
