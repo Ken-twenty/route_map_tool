@@ -40,15 +40,13 @@ class RMQGraphicsScene(QGraphicsScene):
         self.removeItem(self.backgroundItem)
 
         # 设置新的背景并把 backgroundItem 指向它
-        self.backgroundItem = self.addPixmap(
-            QPixmap(newBackground)
-        )
+        self.backgroundItem = self.addPixmap(QPixmap(newBackground))
 
         # resize
         self.setSceneRect(self.backgroundItem.boundingRect())
 
         # 默认首先展示此 scene 的 view 是主视图
-        self.views()[0].rescaleByBackground(self.backgroundItem)
+        self.views()[0].resetTransform()
 
     def mouseReleaseEvent(self, event):
 
@@ -66,6 +64,7 @@ class RMQGraphicsView(QGraphicsView):
         super().__init__(scene, parent)
 
         self.lastestScale = 1
+        self.scaleFromOrigin = 1
 
         SBOff = Qt.ScrollBarPolicy.ScrollBarAlwaysOff
         self.setVerticalScrollBarPolicy(SBOff)
@@ -77,44 +76,36 @@ class RMQGraphicsView(QGraphicsView):
         # 设置 dragMode 为拖动
         self.setDragMode(QGraphicsView.ScrollHandDrag)
 
-    def rescaleByBackground(self, background):
-
-        self.resetTransform()
-
-        # view 可视宽度与 background 的宽度比例
-        scale = self.width() / background.boundingRect().width()
-
-        # background 宽度大于 view 可视宽度
-        if scale < 1:
-
-            # 缩放展示，使 view 的全部可视宽度完整展示 background
-            self.scale(scale, scale)
-
-        # background 尺寸过小
-        else:
-
-            QMessageBox.information(
-                self,
-                "提示",
-                "设计图尺寸过小，请知悉。",
-                QMessageBox.Ok,
-            )
-
-        self.lastestScale = 1
-
     def wheelEvent(self, event):
 
         # 重载鼠标滚轮函数
 
+        # 滚轮向上
         if event.angleDelta().y() > 0:
 
+            # 简单的平滑放大算法
             self.lastestScale = (self.lastestScale + .088) / self.lastestScale
 
+        # 滚轮向下
         else:
 
+            # 简单的平滑缩小算法
             self.lastestScale = (self.lastestScale - .088) / self.lastestScale
 
-        self.scale(self.lastestScale, self.lastestScale)
+        # 计算相对于原尺寸，当前的缩放比例
+        self.scaleFromOrigin *= self.lastestScale
+
+        # 若企图缩小至比原尺寸还小，reset
+        if self.scaleFromOrigin < 1:
+
+            self.resetTransform()
+            self.scaleFromOrigin = 1
+            self.lastestScale = 1
+
+        # 其它情况，正常执行
+        else:
+
+            self.scale(self.lastestScale, self.lastestScale)
 
 
 class RMApp(QMainWindow):
