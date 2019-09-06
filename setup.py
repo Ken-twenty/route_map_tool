@@ -46,7 +46,7 @@ class RMQGraphicsScene(QGraphicsScene):
         self.setSceneRect(self.backgroundItem.boundingRect())
 
         # 默认首先展示此 scene 的 view 是主视图
-        self.views()[0].resetTransform()
+        self.views()[0].resetScale()
 
     def mouseReleaseEvent(self, event):
 
@@ -76,6 +76,12 @@ class RMQGraphicsView(QGraphicsView):
         # 设置 dragMode 为拖动
         self.setDragMode(QGraphicsView.ScrollHandDrag)
 
+    def resetScale(self):
+
+        self.resetTransform()
+        self.scaleFromOrigin = 1
+        self.lastestScale = 1
+
     def wheelEvent(self, event):
 
         # 重载鼠标滚轮函数
@@ -98,9 +104,7 @@ class RMQGraphicsView(QGraphicsView):
         # 若企图缩小至比原尺寸还小，reset
         if self.scaleFromOrigin < 1:
 
-            self.resetTransform()
-            self.scaleFromOrigin = 1
-            self.lastestScale = 1
+            self.resetScale()
 
         # 其它情况，正常执行
         else:
@@ -125,7 +129,7 @@ class RMApp(QMainWindow):
         self.setWindowTitle("RouteMapTool v%s" % __version__)
 
         # 窗体固定尺寸与居中
-        self.setFixedSize(APP_WIDTH, APP_HEIGHT)
+        self.setMinimumSize(APP_WIDTH, APP_HEIGHT)
         self.center()
 
         # 菜单栏
