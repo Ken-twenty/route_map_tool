@@ -8,7 +8,6 @@ from PyQt5.QtCore import Qt
 
 APP_WIDTH = 888
 APP_HEIGHT = APP_WIDTH * .618
-DEFAULT_BACKGROUND = "./source/Jordan.jpg"
 
 
 class RMAction(QAction):
@@ -31,13 +30,14 @@ class RMQGraphicsScene(QGraphicsScene):
 
         super().__init__(parent)
 
-        # 设置默认背景并把 backgroundItem 指向它
-        self.backgroundItem = self.addPixmap(QPixmap(DEFAULT_BACKGROUND))
+        self.backgroundItem = None
 
     def changeBackground(self, newBackground):
 
-        # 移除当前背景 item
-        self.removeItem(self.backgroundItem)
+        # 如果已设置背景 item，先移除
+        if self.backgroundItem:
+
+            self.removeItem(self.backgroundItem)
 
         # 设置新的背景并把 backgroundItem 指向它
         self.backgroundItem = self.addPixmap(QPixmap(newBackground))
