@@ -119,6 +119,9 @@ class RMQGraphicsView(QGraphicsView):
         # 设置 dragMode 为拖动
         self.setDragMode(QGraphicsView.ScrollHandDrag)
 
+        # 设置 cursor
+        self.viewport().setCursor(Qt.CrossCursor)
+
     def resetScale(self):
 
         self.resetTransform()
@@ -153,6 +156,19 @@ class RMQGraphicsView(QGraphicsView):
         else:
 
             self.scale(self.lastestScale, self.lastestScale)
+
+    def mouseReleaseEvent(self, event):
+
+        # 重载鼠标释放函数
+
+        # 调用超类的处理，防止不可追踪的 BUG
+        super().mouseReleaseEvent(event)
+
+        # 左键
+        if event.button() == 1:
+
+            # 拖拽完成后恢复 crossCursor
+            self.viewport().setCursor(Qt.CrossCursor)
 
 
 class RMApp(QMainWindow):
