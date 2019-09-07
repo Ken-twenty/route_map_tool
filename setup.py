@@ -48,14 +48,6 @@ class RMQGraphicsScene(QGraphicsScene):
         # 默认首先展示此 scene 的 view 是主视图
         self.views()[0].resetScale()
 
-    def mouseReleaseEvent(self, event):
-
-        # 右键
-        if event.button() == 2:
-
-            # TODO
-            print(event.scenePos())
-
 
 class RMQGraphicsView(QGraphicsView):
 
