@@ -2,7 +2,7 @@ __author__ = "Ken"
 __version__ = "1.0"
 
 import sys
-from PyQt5.QtWidgets import QApplication, QDesktopWidget, QMainWindow, QAction, QGraphicsView, QGraphicsScene, QMessageBox, QFileDialog
+from PyQt5.QtWidgets import QApplication, QDesktopWidget, QMainWindow, QAction, QGraphicsView, QGraphicsScene, QMessageBox, QFileDialog, QMenu
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import Qt
 
@@ -31,6 +31,7 @@ class RMQGraphicsScene(QGraphicsScene):
         super().__init__(parent)
 
         self.backgroundItem = None
+        self.drawContextMenu(parent)
 
     def changeBackground(self, newBackground):
 
@@ -47,6 +48,56 @@ class RMQGraphicsScene(QGraphicsScene):
 
         # 默认首先展示此 scene 的 view 是主视图
         self.views()[0].resetScale()
+
+    def drawContextMenu(self, parent):
+
+        self.contextMenu = QMenu(parent)
+
+        createStationAction = RMAction(
+            "新增站台",
+            "./source/metro.png",
+            "新增站台（矩形）",
+            self.createStation,
+            parent
+        )
+        self.contextMenu.addAction(createStationAction)
+
+        createCAPAction = RMAction(
+            "新增 CAP",
+            "./source/cap.png",
+            "新增 CAP（点）",
+            self.createCAP,
+            parent
+        )
+        self.contextMenu.addAction(createCAPAction)
+
+        createRailAction = RMAction(
+            "新增轨道",
+            "./source/rail.png",
+            "新增轨道（线）",
+            self.createRail,
+            parent
+        )
+        self.contextMenu.addAction(createRailAction)
+
+    def createStation(self):
+
+        # TODO
+        print("createStation")
+
+    def createCAP(self):
+
+        # TODO
+        print("createCAP")
+
+    def createRail(self):
+
+        # TODO
+        print("createRail")
+
+    def contextMenuEvent(self, event):
+
+        self.contextMenu.popup(event.screenPos())
 
 
 class RMQGraphicsView(QGraphicsView):
