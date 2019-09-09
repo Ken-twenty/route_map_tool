@@ -10,7 +10,7 @@ APP_WIDTH = 888
 APP_HEIGHT = APP_WIDTH * .618
 
 
-class RMAction(QAction):
+class RMQAction(QAction):
 
     def __init__(self, name, icon, statusTip, act, parent):
 
@@ -53,7 +53,7 @@ class RMQGraphicsScene(QGraphicsScene):
 
         self.contextMenu = QMenu(parent)
 
-        createStationAction = RMAction(
+        createStationAction = RMQAction(
             "新增站台",
             "./source/metro.png",
             "新增站台（矩形）",
@@ -62,7 +62,7 @@ class RMQGraphicsScene(QGraphicsScene):
         )
         self.contextMenu.addAction(createStationAction)
 
-        createCAPAction = RMAction(
+        createCAPAction = RMQAction(
             "新增 CAP",
             "./source/cap.png",
             "新增 CAP（点）",
@@ -71,7 +71,7 @@ class RMQGraphicsScene(QGraphicsScene):
         )
         self.contextMenu.addAction(createCAPAction)
 
-        createRailAction = RMAction(
+        createRailAction = RMQAction(
             "新增轨道",
             "./source/rail.png",
             "新增轨道（线）",
@@ -218,7 +218,7 @@ class RMApp(QMainWindow):
 
         fileMenu = menuBar.addMenu("文件")
 
-        insertAction = RMAction(
+        insertAction = RMQAction(
             "插入背景",
             "./source/insert.png",
             "选择背景文件用作参考",
@@ -227,7 +227,7 @@ class RMApp(QMainWindow):
         )
         fileMenu.addAction(insertAction)
 
-        quitAction = RMAction(
+        quitAction = RMQAction(
             "退出",
             "./source/quit.png",
             "关闭此应用",
