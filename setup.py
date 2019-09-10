@@ -79,6 +79,15 @@ class RMCapQGraphicsItem(QGraphicsPixmapItem):
         self.setPos(x - ICON_WIDTH / 2, y - ICON_HEIGHT / 2)
 
 
+class RMRailQGraphicsItem(QGraphicsPixmapItem):
+
+    def __init__(self, x, y):
+
+        super().__init__(QPixmap("./source/rail.png").scaled(ICON_WIDTH, ICON_HEIGHT))
+
+        self.setPos(x - ICON_WIDTH / 2, y - ICON_HEIGHT / 2)
+
+
 class RMQGraphicsScene(QGraphicsScene):
 
     def __init__(self, parent):
@@ -166,8 +175,12 @@ class RMQGraphicsScene(QGraphicsScene):
 
     def createRail(self):
 
-        # TODO
-        print("createRail")
+        self.addItem(
+            RMRailQGraphicsItem(
+                self.focusPosition.x(),
+                self.focusPosition.y(),
+            )
+        )
 
     def contextMenuEvent(self, event):
 
