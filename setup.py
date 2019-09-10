@@ -2,12 +2,16 @@ __author__ = "Ken"
 __version__ = "1.0"
 
 import sys
-from PyQt5.QtWidgets import QApplication, QDesktopWidget, QMainWindow, QAction, QGraphicsView, QGraphicsScene, QMessageBox, QFileDialog, QMenu
-from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtWidgets import QApplication, QDesktopWidget, QMainWindow, QAction, QGraphicsView, QGraphicsScene, QGraphicsRectItem, QGraphicsPixmapItem, QMessageBox, QFileDialog, QMenu
+from PyQt5.QtGui import QIcon, QPixmap, QBrush
 from PyQt5.QtCore import Qt
 
 APP_WIDTH = 888
 APP_HEIGHT = APP_WIDTH * .618
+STATION_WIDTH = 168
+STATION_HEIGHT = STATION_WIDTH * .618
+ICON_WIDTH = 36
+ICON_HEIGHT = 36
 
 
 class RMQAction(QAction):
@@ -24,6 +28,22 @@ class RMQAction(QAction):
         self.triggered.connect(act)
 
 
+class RMStationQGraphicsItem(QGraphicsRectItem):
+
+    def __init__(self, x, y, width=STATION_WIDTH, height=STATION_HEIGHT):
+
+        super().__init__(x - width / 2, y - height / 2, width, height)
+
+        # 背景黑色
+        self.setBrush(QBrush(Qt.black))
+
+        # station icon
+        QGraphicsPixmapItem(
+            QPixmap("./source/station.png").scaled(ICON_WIDTH, ICON_HEIGHT),
+            self
+        ).setPos(x - width / 2 + 8, y - ICON_HEIGHT / 2)
+
+
 class RMQGraphicsScene(QGraphicsScene):
 
     def __init__(self, parent):
@@ -31,6 +51,7 @@ class RMQGraphicsScene(QGraphicsScene):
         super().__init__(parent)
 
         self.backgroundItem = None
+        self.focusPosition = None
         self.drawContextMenu(parent)
 
     def changeBackground(self, newBackground):
@@ -55,7 +76,7 @@ class RMQGraphicsScene(QGraphicsScene):
 
         createStationAction = RMQAction(
             "新增站台",
-            "./source/metro.png",
+            "./source/station.png",
             "新增站台（矩形）",
             self.createStation,
             parent
@@ -82,8 +103,12 @@ class RMQGraphicsScene(QGraphicsScene):
 
     def createStation(self):
 
-        # TODO
-        print("createStation")
+        self.addItem(
+            RMStationQGraphicsItem(
+                self.focusPosition.x(),
+                self.focusPosition.y()
+            )
+        )
 
     def createCAP(self):
 
@@ -97,6 +122,7 @@ class RMQGraphicsScene(QGraphicsScene):
 
     def contextMenuEvent(self, event):
 
+        self.focusPosition = event.scenePos()
         self.contextMenu.popup(event.screenPos())
 
 
