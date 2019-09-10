@@ -70,6 +70,15 @@ class RMStationQGraphicsItem(QGraphicsRectItem):
         )
 
 
+class RMCapQGraphicsItem(QGraphicsPixmapItem):
+
+    def __init__(self, x, y):
+
+        super().__init__(QPixmap("./source/cap.png").scaled(ICON_WIDTH, ICON_HEIGHT))
+
+        self.setPos(x - ICON_WIDTH / 2, y - ICON_HEIGHT / 2)
+
+
 class RMQGraphicsScene(QGraphicsScene):
 
     def __init__(self, parent):
@@ -148,8 +157,12 @@ class RMQGraphicsScene(QGraphicsScene):
 
     def createCAP(self):
 
-        # TODO
-        print("createCAP")
+        self.addItem(
+            RMCapQGraphicsItem(
+                self.focusPosition.x(),
+                self.focusPosition.y(),
+            )
+        )
 
     def createRail(self):
 
