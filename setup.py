@@ -2,16 +2,33 @@ __author__ = "Ken"
 __version__ = "1.0"
 
 import sys
-from PyQt5.QtWidgets import QApplication, QDesktopWidget, QMainWindow, QAction, QGraphicsView, QGraphicsScene, QGraphicsRectItem, QGraphicsPixmapItem, QMessageBox, QFileDialog, QMenu
-from PyQt5.QtGui import QIcon, QPixmap, QBrush
+from PyQt5.QtWidgets import\
+    QApplication,\
+    QDesktopWidget,\
+    QMainWindow,\
+    QMenu,\
+    QAction,\
+    QGraphicsView,\
+    QGraphicsScene,\
+    QGraphicsRectItem,\
+    QGraphicsPixmapItem,\
+    QGraphicsSimpleTextItem,\
+    QMessageBox,\
+    QFileDialog,\
+    QInputDialog
+from PyQt5.QtGui import QIcon, QPixmap, QBrush, QFont
 from PyQt5.QtCore import Qt
 
 APP_WIDTH = 888
 APP_HEIGHT = APP_WIDTH * .618
 STATION_WIDTH = 168
 STATION_HEIGHT = STATION_WIDTH * .618
-ICON_WIDTH = 36
-ICON_HEIGHT = 36
+ICON_WIDTH = 24
+ICON_HEIGHT = 24
+
+black_brush = QBrush(Qt.black)
+white_brush = QBrush(Qt.white)
+title_font = QFont("Microsoft YaHei", 16)
 
 
 class RMQAction(QAction):
@@ -30,18 +47,27 @@ class RMQAction(QAction):
 
 class RMStationQGraphicsItem(QGraphicsRectItem):
 
-    def __init__(self, x, y, width=STATION_WIDTH, height=STATION_HEIGHT):
+    def __init__(self, x, y, width=STATION_WIDTH, height=STATION_HEIGHT, name=""):
 
         super().__init__(x - width / 2, y - height / 2, width, height)
 
         # 背景黑色
-        self.setBrush(QBrush(Qt.black))
+        self.setBrush(black_brush)
 
-        # station icon
+        # icon
         QGraphicsPixmapItem(
             QPixmap("./source/station.png").scaled(ICON_WIDTH, ICON_HEIGHT),
             self
         ).setPos(x - width / 2 + 8, y - ICON_HEIGHT / 2)
+
+        # name
+        name = QGraphicsSimpleTextItem(name, self)
+        name.setBrush(white_brush)
+        name.setFont(title_font)
+        name.setPos(
+            x - width / 2 + 8 + ICON_WIDTH,
+            y - name.boundingRect().height() / 2
+        )
 
 
 class RMQGraphicsScene(QGraphicsScene):
@@ -52,6 +78,7 @@ class RMQGraphicsScene(QGraphicsScene):
 
         self.backgroundItem = None
         self.focusPosition = None
+        self.parent = parent
         self.drawContextMenu(parent)
 
     def changeBackground(self, newBackground):
@@ -103,12 +130,21 @@ class RMQGraphicsScene(QGraphicsScene):
 
     def createStation(self):
 
-        self.addItem(
-            RMStationQGraphicsItem(
-                self.focusPosition.x(),
-                self.focusPosition.y()
-            )
+        stationName, ok = QInputDialog.getText(
+            self.parent,
+            "请输入站点名",
+            "站点名"
         )
+
+        if ok:
+
+            self.addItem(
+                RMStationQGraphicsItem(
+                    self.focusPosition.x(),
+                    self.focusPosition.y(),
+                    name=stationName
+                )
+            )
 
     def createCAP(self):
 
