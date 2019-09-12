@@ -2,6 +2,7 @@ __author__ = "Ken"
 __version__ = "1.0"
 
 import sys
+from utils import RM_path
 from PyQt5.QtWidgets import\
     QApplication,\
     QDesktopWidget,\
@@ -36,7 +37,7 @@ class RMQAction(QAction):
     def __init__(self, name, icon, statusTip, act, parent):
 
         super().__init__(
-            QIcon(icon),
+            QIcon(RM_path(icon)),
             name,
             parent
         )
@@ -56,7 +57,7 @@ class RMStationQGraphicsItem(QGraphicsRectItem):
 
         # icon
         QGraphicsPixmapItem(
-            QPixmap("./source/station.png").scaled(ICON_WIDTH, ICON_HEIGHT),
+            QPixmap(RM_path("./source/station.png")).scaled(ICON_WIDTH, ICON_HEIGHT),
             self
         ).setPos(x - width / 2 + 8, y - ICON_HEIGHT / 2)
 
@@ -74,7 +75,7 @@ class RMCapQGraphicsItem(QGraphicsPixmapItem):
 
     def __init__(self, x, y):
 
-        super().__init__(QPixmap("./source/cap.png").scaled(ICON_WIDTH, ICON_HEIGHT))
+        super().__init__(QPixmap(RM_path("./source/cap.png")).scaled(ICON_WIDTH, ICON_HEIGHT))
 
         self.setPos(x - ICON_WIDTH / 2, y - ICON_HEIGHT / 2)
 
@@ -83,7 +84,7 @@ class RMRailQGraphicsItem(QGraphicsPixmapItem):
 
     def __init__(self, x, y):
 
-        super().__init__(QPixmap("./source/rail.png").scaled(ICON_WIDTH, ICON_HEIGHT))
+        super().__init__(QPixmap(RM_path("./source/rail.png")).scaled(ICON_WIDTH, ICON_HEIGHT))
 
         self.setPos(x - ICON_WIDTH / 2, y - ICON_HEIGHT / 2)
 
@@ -272,7 +273,7 @@ class RMApp(QMainWindow):
         self.graphicsView = RMQGraphicsView(self.graphicsScene, self)
 
         # 标题栏
-        self.setWindowIcon(QIcon("./source/logo.png"))
+        self.setWindowIcon(QIcon(RM_path("./source/logo.png")))
         self.setWindowTitle("RouteMapTool v%s" % __version__)
 
         # 窗体固定尺寸与居中
