@@ -52,6 +52,11 @@ class RMBackgroundQGraphicsItem(QGraphicsPixmapItem):
 
         super().__init__(QPixmap(RM_path(imagePath)))
 
+    def contextMenuEvent(self, event):
+
+        self.scene().focusPosition = event.scenePos()
+        self.scene().contextMenu.popup(event.screenPos())
+
 
 class RMStationQGraphicsItem(QGraphicsRectItem):
 
@@ -64,7 +69,8 @@ class RMStationQGraphicsItem(QGraphicsRectItem):
 
         # icon
         QGraphicsPixmapItem(
-            QPixmap(RM_path("./source/station.png")).scaled(ICON_WIDTH, ICON_HEIGHT),
+            QPixmap(RM_path("./source/station.png"))
+            .scaled(ICON_WIDTH, ICON_HEIGHT),
             self
         ).setPos(x - width / 2 + 8, y - ICON_HEIGHT / 2)
 
@@ -77,6 +83,10 @@ class RMStationQGraphicsItem(QGraphicsRectItem):
             y - name.boundingRect().height() / 2
         )
 
+    def contextMenuEvent(self, event):
+
+        print("TODO")
+
 
 class RMCapQGraphicsItem(QGraphicsPixmapItem):
 
@@ -86,6 +96,10 @@ class RMCapQGraphicsItem(QGraphicsPixmapItem):
 
         self.setPos(x - ICON_WIDTH / 2, y - ICON_HEIGHT / 2)
 
+    def contextMenuEvent(self, event):
+
+        print("TODO")
+
 
 class RMRailQGraphicsItem(QGraphicsPixmapItem):
 
@@ -94,6 +108,10 @@ class RMRailQGraphicsItem(QGraphicsPixmapItem):
         super().__init__(QPixmap(RM_path("./source/rail.png")).scaled(ICON_WIDTH, ICON_HEIGHT))
 
         self.setPos(x - ICON_WIDTH / 2, y - ICON_HEIGHT / 2)
+
+    def contextMenuEvent(self, event):
+
+        print("TODO")
 
 
 class RMQGraphicsScene(QGraphicsScene):
@@ -188,11 +206,6 @@ class RMQGraphicsScene(QGraphicsScene):
                 self.focusPosition.y(),
             )
         )
-
-    def contextMenuEvent(self, event):
-
-        self.focusPosition = event.scenePos()
-        self.contextMenu.popup(event.screenPos())
 
 
 class RMQGraphicsView(QGraphicsView):
