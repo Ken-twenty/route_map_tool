@@ -46,6 +46,13 @@ class RMQAction(QAction):
         self.triggered.connect(act)
 
 
+class RMBackgroundQGraphicsItem(QGraphicsPixmapItem):
+
+    def __init__(self, imagePath):
+
+        super().__init__(QPixmap(RM_path(imagePath)))
+
+
 class RMStationQGraphicsItem(QGraphicsRectItem):
 
     def __init__(self, x, y, width=STATION_WIDTH, height=STATION_HEIGHT, name=""):
@@ -102,13 +109,12 @@ class RMQGraphicsScene(QGraphicsScene):
 
     def changeBackground(self, newBackground):
 
-        # 如果已设置背景 item，先移除
-        if self.backgroundItem:
+        # 移除所有图元（业务设计如此）
+        self.clear()
 
-            self.removeItem(self.backgroundItem)
-
-        # 设置新的背景并把 backgroundItem 指向它
-        self.backgroundItem = self.addPixmap(QPixmap(newBackground))
+        # 把 backgroundItem 指向新的背景图元并设置
+        self.backgroundItem = RMBackgroundQGraphicsItem(newBackground)
+        self.addItem(self.backgroundItem)
 
         # resize
         self.setSceneRect(self.backgroundItem.boundingRect())
@@ -329,6 +335,20 @@ class RMApp(QMainWindow):
     # init end
 
     def new(self):
+
+        if len(self.graphicsScene.items()):
+
+            reply = QMessageBox.question(
+                self,
+                "提示",
+                "新建背景前请确保已保存当前任务",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No
+            )
+
+            if reply == QMessageBox.No:
+
+                return
 
         backgrounds = QFileDialog.getOpenFileName(
             self,
