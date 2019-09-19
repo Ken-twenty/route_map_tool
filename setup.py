@@ -307,14 +307,14 @@ class RMApp(QMainWindow):
 
         fileMenu = menuBar.addMenu("文件")
 
-        insertAction = RMQAction(
-            "插入背景",
-            "./source/insert.png",
+        newAction = RMQAction(
+            "新建背景",
+            "./source/new.png",
             "选择背景文件用作参考",
-            self.insert,
+            self.new,
             self
         )
-        fileMenu.addAction(insertAction)
+        fileMenu.addAction(newAction)
 
         quitAction = RMQAction(
             "退出",
@@ -328,7 +328,7 @@ class RMApp(QMainWindow):
 
     # init end
 
-    def insert(self):
+    def new(self):
 
         backgrounds = QFileDialog.getOpenFileName(
             self,
