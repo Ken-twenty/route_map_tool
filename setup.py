@@ -55,7 +55,7 @@ class RMBackgroundQGraphicsItem(QGraphicsPixmapItem):
     def contextMenuEvent(self, event):
 
         self.scene().focusPosition = event.scenePos()
-        self.scene().contextMenu.popup(event.screenPos())
+        self.scene().backgroundContextMenu.popup(event.screenPos())
 
 
 class RMStationQGraphicsItem(QGraphicsRectItem):
@@ -123,7 +123,7 @@ class RMQGraphicsScene(QGraphicsScene):
         self.backgroundItem = None
         self.focusPosition = None
         self.parent = parent
-        self.drawContextMenu(parent)
+        self.drawBackgroundContextMenu(parent)
 
     def changeBackground(self, newBackground):
 
@@ -140,9 +140,9 @@ class RMQGraphicsScene(QGraphicsScene):
         # 默认首先展示此 scene 的 view 是主视图
         self.views()[0].resetScale()
 
-    def drawContextMenu(self, parent):
+    def drawBackgroundContextMenu(self, parent):
 
-        self.contextMenu = QMenu(parent)
+        self.backgroundContextMenu = QMenu(parent)
 
         createStationAction = RMQAction(
             "新增站台",
@@ -151,8 +151,6 @@ class RMQGraphicsScene(QGraphicsScene):
             self.createStation,
             parent
         )
-        self.contextMenu.addAction(createStationAction)
-
         createCAPAction = RMQAction(
             "新增 CAP",
             "./source/cap.png",
@@ -160,8 +158,6 @@ class RMQGraphicsScene(QGraphicsScene):
             self.createCAP,
             parent
         )
-        self.contextMenu.addAction(createCAPAction)
-
         createRailAction = RMQAction(
             "新增轨道",
             "./source/rail.png",
@@ -169,9 +165,12 @@ class RMQGraphicsScene(QGraphicsScene):
             self.createRail,
             parent
         )
-        self.contextMenu.addAction(createRailAction)
 
-    def createStation(self):
+        self.backgroundContextMenu.addAction(createStationAction)
+        self.backgroundContextMenu.addAction(createCAPAction)
+        self.backgroundContextMenu.addAction(createRailAction)
+
+    def createStation(self, offsetX=0, offsetY=0):
 
         stationName, ok = QInputDialog.getText(
             self.parent,
@@ -183,27 +182,27 @@ class RMQGraphicsScene(QGraphicsScene):
 
             self.addItem(
                 RMStationQGraphicsItem(
-                    self.focusPosition.x(),
-                    self.focusPosition.y(),
+                    self.focusPosition.x() + offsetX,
+                    self.focusPosition.y() + offsetY,
                     name=stationName
                 )
             )
 
-    def createCAP(self):
+    def createCAP(self, offsetX=0, offsetY=0):
 
         self.addItem(
             RMCapQGraphicsItem(
-                self.focusPosition.x(),
-                self.focusPosition.y(),
+                self.focusPosition.x() + offsetX,
+                self.focusPosition.y() + offsetY,
             )
         )
 
-    def createRail(self):
+    def createRail(self, offsetX=0, offsetY=0):
 
         self.addItem(
             RMRailQGraphicsItem(
-                self.focusPosition.x(),
-                self.focusPosition.y(),
+                self.focusPosition.x() + offsetX,
+                self.focusPosition.y() + offsetY,
             )
         )
 
