@@ -234,7 +234,32 @@ class RMQGraphicsScene(QGraphicsScene):
         downwardsSubmenu.addAction(createCAPDownwardsAction)
         downwardsSubmenu.addAction(createRailDownwardsAction)
 
+        createStationLeftwardsAction = RMQAction(
+            "新增站台",
+            "./source/station.png",
+            "向左新增站台（矩形）",
+            lambda: self.createStation(-STATION_WIDTH, 0),
+            parent
+        )
+        createCAPLeftwardsAction = RMQAction(
+            "新增 CAP",
+            "./source/cap.png",
+            "向左新增 CAP（点）",
+            lambda: self.createCAP(-(STATION_WIDTH / 2 + ICON_WIDTH / 2), 0),
+            parent
+        )
+        createRailLeftwardsAction = RMQAction(
+            "新增轨道",
+            "./source/rail.png",
+            "向左新增轨道（线）",
+            lambda: self.createRail(-(STATION_WIDTH / 2 + ICON_WIDTH / 2), 0),
+            parent
+        )
+
         leftwardsSubmenu = self.stationContextMenu.addMenu("向左")
+        leftwardsSubmenu.addAction(createStationLeftwardsAction)
+        leftwardsSubmenu.addAction(createCAPLeftwardsAction)
+        leftwardsSubmenu.addAction(createRailLeftwardsAction)
 
         rightwardsSubmenu = self.stationContextMenu.addMenu("向右")
 
