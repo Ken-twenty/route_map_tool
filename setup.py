@@ -62,30 +62,35 @@ class RMStationQGraphicsItem(QGraphicsRectItem):
 
     def __init__(self, x, y, width=STATION_WIDTH, height=STATION_HEIGHT, name=""):
 
-        super().__init__(x - width / 2, y - height / 2, width, height)
+        # 此处的初始化 xy 值是以 item coordinate 标记矩形的起始点（左上角）
+        super().__init__(-width / 2, -height / 2, width, height)
+
+        # 此处的 xy 值是以 scene coordinate 标记矩形，结合上面的初始化，标记点是矩形的几何中心
+        self.setPos(x, y)
 
         # 背景黑色
         self.setBrush(black_brush)
 
-        # icon
+        # icon（相对于父 item 的 xy 值）
         QGraphicsPixmapItem(
             QPixmap(RM_path("./source/station.png"))
             .scaled(ICON_WIDTH, ICON_HEIGHT),
             self
-        ).setPos(x - width / 2 + 8, y - ICON_HEIGHT / 2)
+        ).setPos(-width / 2 + 8, -ICON_HEIGHT / 2)
 
-        # name
+        # name（相对于父 item 的 xy 值）
         name = QGraphicsSimpleTextItem(name, self)
         name.setBrush(white_brush)
         name.setFont(title_font)
         name.setPos(
-            x - width / 2 + 8 + ICON_WIDTH,
-            y - name.boundingRect().height() / 2
+            -width / 2 + 8 + ICON_WIDTH,
+            -name.boundingRect().height() / 2
         )
 
     def contextMenuEvent(self, event):
 
-        print("TODO")
+        self.scene().focusPosition = self.scenePos()
+        self.scene().stationContextMenu.popup(event.screenPos())
 
 
 class RMCapQGraphicsItem(QGraphicsPixmapItem):
@@ -124,6 +129,7 @@ class RMQGraphicsScene(QGraphicsScene):
         self.focusPosition = None
         self.parent = parent
         self.drawBackgroundContextMenu(parent)
+        self.drawStationContextMenu(parent)
 
     def changeBackground(self, newBackground):
 
@@ -169,6 +175,43 @@ class RMQGraphicsScene(QGraphicsScene):
         self.backgroundContextMenu.addAction(createStationAction)
         self.backgroundContextMenu.addAction(createCAPAction)
         self.backgroundContextMenu.addAction(createRailAction)
+
+    def drawStationContextMenu(self, parent):
+
+        self.stationContextMenu = QMenu(parent)
+
+        createStationUpwardsAction = RMQAction(
+            "新增站台",
+            "./source/station.png",
+            "向上新增站台（矩形）",
+            lambda: self.createStation(0, -STATION_HEIGHT),
+            parent
+        )
+        createCAPUpwardsAction = RMQAction(
+            "新增 CAP",
+            "./source/cap.png",
+            "向上新增 CAP（点）",
+            lambda: self.createCAP(0, -(STATION_HEIGHT / 2 + ICON_HEIGHT / 2)),
+            parent
+        )
+        createRailUpwardsAction = RMQAction(
+            "新增轨道",
+            "./source/rail.png",
+            "向上新增轨道（线）",
+            lambda: self.createRail(0, -(STATION_HEIGHT / 2 + ICON_HEIGHT / 2)),
+            parent
+        )
+
+        upwardsSubmenu = self.stationContextMenu.addMenu("向上")
+        upwardsSubmenu.addAction(createStationUpwardsAction)
+        upwardsSubmenu.addAction(createCAPUpwardsAction)
+        upwardsSubmenu.addAction(createRailUpwardsAction)
+
+        downwardsSubmenu = self.stationContextMenu.addMenu("向下")
+
+        leftwardsSubmenu = self.stationContextMenu.addMenu("向左")
+
+        rightwardsSubmenu = self.stationContextMenu.addMenu("向右")
 
     def createStation(self, offsetX=0, offsetY=0):
 
