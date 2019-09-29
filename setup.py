@@ -93,17 +93,20 @@ class RMStationQGraphicsItem(QGraphicsRectItem):
         self.scene().stationContextMenu.popup(event.screenPos())
 
 
-class RMCapQGraphicsItem(QGraphicsPixmapItem):
+class RMCAPQGraphicsItem(QGraphicsPixmapItem):
 
     def __init__(self, x, y):
 
         super().__init__(QPixmap(RM_path("./source/cap.png")).scaled(ICON_WIDTH, ICON_HEIGHT))
 
-        self.setPos(x - ICON_WIDTH / 2, y - ICON_HEIGHT / 2)
+        # 配合偏移值，以几何中心为 scenePos
+        self.setPos(x, y)
+        self.setOffset(-ICON_WIDTH / 2, -ICON_HEIGHT / 2)
 
     def contextMenuEvent(self, event):
 
-        print("TODO")
+        self.scene().focusPosition = self.scenePos()
+        self.scene().CAPContextMenu.popup(event.screenPos())
 
 
 class RMRailQGraphicsItem(QGraphicsPixmapItem):
@@ -130,6 +133,7 @@ class RMQGraphicsScene(QGraphicsScene):
         self.parent = parent
         self.drawBackgroundContextMenu(parent)
         self.drawStationContextMenu(parent)
+        self.drawCAPContextMenu(parent)
 
     def changeBackground(self, newBackground):
 
@@ -198,7 +202,10 @@ class RMQGraphicsScene(QGraphicsScene):
             "新增轨道",
             "./source/rail.png",
             "向上新增轨道（线）",
-            lambda: self.createRail(0, -(STATION_HEIGHT / 2 + ICON_HEIGHT / 2)),
+            lambda: self.createRail(
+                0,
+                -(STATION_HEIGHT / 2 + ICON_HEIGHT / 2)
+            ),
             parent
         )
 
@@ -288,6 +295,127 @@ class RMQGraphicsScene(QGraphicsScene):
         rightwardsSubmenu.addAction(createCAPRightwardsAction)
         rightwardsSubmenu.addAction(createRailRightwardsAction)
 
+    def drawCAPContextMenu(self, parent):
+
+        self.CAPContextMenu = QMenu(parent)
+
+        createStationUpwardsAction = RMQAction(
+            "新增站台",
+            "./source/station.png",
+            "向上新增站台（矩形）",
+            lambda: self.createStation(
+                0,
+                -(ICON_HEIGHT / 2 + STATION_HEIGHT / 2)
+            ),
+            parent
+        )
+        createCAPUpwardsAction = RMQAction(
+            "新增 CAP",
+            "./source/cap.png",
+            "向上新增 CAP（点）",
+            lambda: self.createCAP(0, -ICON_HEIGHT),
+            parent
+        )
+        createRailUpwardsAction = RMQAction(
+            "新增轨道",
+            "./source/rail.png",
+            "向上新增轨道（线）",
+            lambda: self.createRail(0, -ICON_HEIGHT),
+            parent
+        )
+
+        upwardsSubmenu = self.CAPContextMenu.addMenu("向上")
+        upwardsSubmenu.addAction(createStationUpwardsAction)
+        upwardsSubmenu.addAction(createCAPUpwardsAction)
+        upwardsSubmenu.addAction(createRailUpwardsAction)
+
+        createStationDownwardsAction = RMQAction(
+            "新增站台",
+            "./source/station.png",
+            "向下新增站台（矩形）",
+            lambda: self.createStation(
+                0,
+                ICON_HEIGHT / 2 + STATION_HEIGHT / 2
+            ),
+            parent
+        )
+        createCAPDownwardsAction = RMQAction(
+            "新增 CAP",
+            "./source/cap.png",
+            "向下新增 CAP（点）",
+            lambda: self.createCAP(0, ICON_HEIGHT),
+            parent
+        )
+        createRailDownwardsAction = RMQAction(
+            "新增轨道",
+            "./source/rail.png",
+            "向下新增轨道（线）",
+            lambda: self.createRail(0, ICON_HEIGHT),
+            parent
+        )
+
+        downwardsSubmenu = self.CAPContextMenu.addMenu("向下")
+        downwardsSubmenu.addAction(createStationDownwardsAction)
+        downwardsSubmenu.addAction(createCAPDownwardsAction)
+        downwardsSubmenu.addAction(createRailDownwardsAction)
+
+        createStationLeftwardsAction = RMQAction(
+            "新增站台",
+            "./source/station.png",
+            "向左新增站台（矩形）",
+            lambda: self.createStation(
+                -(ICON_WIDTH / 2 + STATION_WIDTH / 2),
+                0
+            ),
+            parent
+        )
+        createCAPLeftwardsAction = RMQAction(
+            "新增 CAP",
+            "./source/cap.png",
+            "向左新增 CAP（点）",
+            lambda: self.createCAP(-ICON_WIDTH, 0),
+            parent
+        )
+        createRailLeftwardsAction = RMQAction(
+            "新增轨道",
+            "./source/rail.png",
+            "向左新增轨道（线）",
+            lambda: self.createRail(-ICON_WIDTH, 0),
+            parent
+        )
+
+        leftwardsSubmenu = self.CAPContextMenu.addMenu("向左")
+        leftwardsSubmenu.addAction(createStationLeftwardsAction)
+        leftwardsSubmenu.addAction(createCAPLeftwardsAction)
+        leftwardsSubmenu.addAction(createRailLeftwardsAction)
+
+        createStationRightwardsAction = RMQAction(
+            "新增站台",
+            "./source/station.png",
+            "向右新增站台（矩形）",
+            lambda: self.createStation(ICON_WIDTH / 2 + STATION_WIDTH / 2, 0),
+            parent
+        )
+        createCAPRightwardsAction = RMQAction(
+            "新增 CAP",
+            "./source/cap.png",
+            "向右新增 CAP（点）",
+            lambda: self.createCAP(ICON_WIDTH, 0),
+            parent
+        )
+        createRailRightwardsAction = RMQAction(
+            "新增轨道",
+            "./source/rail.png",
+            "向右新增轨道（线）",
+            lambda: self.createRail(ICON_WIDTH, 0),
+            parent
+        )
+
+        rightwardsSubmenu = self.CAPContextMenu.addMenu("向右")
+        rightwardsSubmenu.addAction(createStationRightwardsAction)
+        rightwardsSubmenu.addAction(createCAPRightwardsAction)
+        rightwardsSubmenu.addAction(createRailRightwardsAction)
+
     def createStation(self, offsetX=0, offsetY=0):
 
         stationName, ok = QInputDialog.getText(
@@ -309,7 +437,7 @@ class RMQGraphicsScene(QGraphicsScene):
     def createCAP(self, offsetX=0, offsetY=0):
 
         self.addItem(
-            RMCapQGraphicsItem(
+            RMCAPQGraphicsItem(
                 self.focusPosition.x() + offsetX,
                 self.focusPosition.y() + offsetY,
             )
