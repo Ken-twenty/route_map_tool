@@ -12,6 +12,7 @@ from PyQt5.QtWidgets import\
     QGraphicsView,\
     QGraphicsScene,\
     QGraphicsRectItem,\
+    QGraphicsLineItem, \
     QGraphicsPixmapItem,\
     QGraphicsSimpleTextItem,\
     QMessageBox,\
@@ -22,14 +23,14 @@ from PyQt5.QtCore import Qt
 
 APP_WIDTH = 888
 APP_HEIGHT = APP_WIDTH * .618
-STATION_WIDTH = 168
+STATION_WIDTH = 128
 STATION_HEIGHT = STATION_WIDTH * .618
 ICON_WIDTH = 24
 ICON_HEIGHT = 24
 
 black_brush = QBrush(Qt.black)
 white_brush = QBrush(Qt.white)
-title_font = QFont("Microsoft YaHei", 16)
+title_font = QFont("Microsoft YaHei", 10)
 
 
 class RMQAction(QAction):
@@ -109,13 +110,11 @@ class RMCAPQGraphicsItem(QGraphicsPixmapItem):
         self.scene().CAPContextMenu.popup(event.screenPos())
 
 
-class RMRailQGraphicsItem(QGraphicsPixmapItem):
+class RMRailQGraphicsItem(QGraphicsLineItem):
 
-    def __init__(self, x, y):
+    def __init__(self, x1, y1, x2, y2):
 
-        super().__init__(QPixmap(RM_path("./source/rail.png")).scaled(ICON_WIDTH, ICON_HEIGHT))
-
-        self.setPos(x - ICON_WIDTH / 2, y - ICON_HEIGHT / 2)
+        super().__init__(x1, y1, x2, y2)
 
     def contextMenuEvent(self, event):
 
@@ -469,11 +468,19 @@ class RMQGraphicsView(QGraphicsView):
         # 取消默认的黑框
         self.setStyleSheet("border: 0")
 
-        # 设置 dragMode 为拖动
+        # 设置 dragMode 为拖拽
         self.setDragMode(QGraphicsView.ScrollHandDrag)
 
-        # 设置 cursor
+        # 设置 cursor 为十字镐
         self.viewport().setCursor(Qt.CrossCursor)
+
+        # 解决 “画橡皮筋时释放 L 键” 的问题
+
+        # 设置 rubberBandDragging flag 为 False
+        self.rubberBandDragging = False
+
+        # 设置 LReleasedWhileRubberBandDragging flag 为 False
+        self.LReleasedWhileRubberBandDragging = False
 
     def resetScale(self):
 
@@ -510,6 +517,20 @@ class RMQGraphicsView(QGraphicsView):
 
             self.scale(self.lastestScale, self.lastestScale)
 
+    def mousePressEvent(self, event):
+
+        # 重载鼠标按下函数
+
+        # 调用超类的处理，防止不可追踪的 BUG
+        super().mousePressEvent(event)
+
+        # 左键且处于橡皮筋 dragMode
+
+        if event.button() == Qt.LeftButton and self.dragMode() == QGraphicsView.RubberBandDrag:
+
+            # 设置 rubberBandDragging flag 为 True
+            self.rubberBandDragging = True
+
     def mouseReleaseEvent(self, event):
 
         # 重载鼠标释放函数
@@ -518,10 +539,82 @@ class RMQGraphicsView(QGraphicsView):
         super().mouseReleaseEvent(event)
 
         # 左键
-        if event.button() == 1:
+        if event.button() == Qt.LeftButton:
 
-            # 拖拽完成后恢复 crossCursor
-            self.viewport().setCursor(Qt.CrossCursor)
+            # 先释放鼠标左键再释放 L 键
+            if self.LReleasedWhileRubberBandDragging == False:
+
+                if self.dragMode() == QGraphicsView.RubberBandDrag:
+
+                    # 橡皮筋完成后恢复箭头
+                    self.viewport().setCursor(Qt.ArrowCursor)
+
+                    # 设置 rubberBandDragging flag 为 False
+                    self.rubberBandDragging = False
+
+                elif self.dragMode() == QGraphicsView.ScrollHandDrag:
+
+                    # 拖拽完成后恢复十字镐
+                    self.viewport().setCursor(Qt.CrossCursor)
+
+            # 先释放 L 键再释放鼠标左键
+            elif self.LReleasedWhileRubberBandDragging:
+
+                # 设置 dragMode 为拖拽
+                self.setDragMode(QGraphicsView.ScrollHandDrag)
+
+                # 设置 cursor 为十字镐
+                self.viewport().setCursor(Qt.CrossCursor)
+
+                # 设置 rubberBandDragging flag 为 False
+                self.rubberBandDragging = False
+
+                # 设置 LReleasedWhileRubberBandDragging flag 为 False
+                self.LReleasedWhileRubberBandDragging = False
+
+    def keyPressEvent(self, event):
+
+        # 重载键盘按下函数
+
+        # 调用超类的处理，防止不可追踪的 BUG
+        super().keyPressEvent(event)
+
+        # L 键且不是长按
+        if event.key() == 76 and event.isAutoRepeat() == False:
+
+            # 设置 dragMode 为橡皮筋
+            self.setDragMode(QGraphicsView.RubberBandDrag)
+
+            # 设置 cursor 为箭头
+            self.viewport().setCursor(Qt.ArrowCursor)
+
+    def keyReleaseEvent(self, event):
+
+        # 重载键盘释放函数
+
+        # 调用超类的处理，防止不可追踪的 BUG
+        super().keyReleaseEvent(event)
+
+        # L 键且不是长按
+        if event.key() == 76 and event.isAutoRepeat() == False:
+
+            # 没有正在画橡皮筋
+            if self.rubberBandDragging == False:
+
+                # 设置 dragMode 为拖拽
+                self.setDragMode(QGraphicsView.ScrollHandDrag)
+
+                # 设置 cursor 为十字镐
+                self.viewport().setCursor(Qt.CrossCursor)
+
+                # 设置 LReleasedWhileRubberBandDragging flag 为 False
+                self.LReleasedWhileRubberBandDragging = False
+
+            # 正在画橡皮筋
+            elif self.rubberBandDragging:
+
+                # 设置 LReleasedWhileRubberBandDragging flag 为 True
+                self.LReleasedWhileRubberBandDragging = True
 
 
 class RMApp(QMainWindow):
